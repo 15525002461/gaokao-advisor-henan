@@ -1,15 +1,20 @@
+# Python
 __pycache__/
-*.py[cod]
-*$py.class
-*.so
-.Python
+*.pyc
+*.pyo
+.venv/
 venv/
-env/
-.env
-.venv
-data/henan/*.db
-data/henan/*.json
-!data/henan/.gitkeep
+venv_arm/
+
+# Data - DO NOT commit large db to git
+data/national/
+data/henan/gaokao_v2.db
+data/cache/
+
+# OS
 .DS_Store
+.idea/
+.vscode/
+
+# Tunnel logs
 *.log
-.pytest_cache/
