@@ -73,6 +73,8 @@ class RecommendRequest(BaseModel):
     target_provinces: list[str] | None = Field(default=None, description="目标省份列表（中文），None=全国")
     top_n: int = Field(default=10, ge=5, le=20, description="推荐条数")
     include_985_211_only: bool = Field(default=False, description="只推荐 985/211")
+    major_keyword: str | None = Field(default=None, description="目标专业（自由文本，模糊匹配）", examples=["计算机"])
+    major_category: str | None = Field(default=None, description="目标专业分类（key），如 '计算机类'", examples=["计算机类"])
 
 
 # ============ API 路由 ============
@@ -108,6 +110,16 @@ async def get_subject_types():
     }
 
 
+@app.get("/api/major-categories")
+async def get_major_categories():
+    """返回专业分类列表（用于需求 2 进阶版的分类下拉）"""
+    from core.major_categories import list_categories
+    return {
+        "count": len(list_categories()),
+        "categories": list_categories(),
+    }
+
+
 @app.post("/api/recommend")
 async def api_recommend(req: RecommendRequest):
     """志愿推荐"""
@@ -120,6 +132,8 @@ async def api_recommend(req: RecommendRequest):
             target_provinces=req.target_provinces,
             top_n=req.top_n,
             include_985_211_only=req.include_985_211_only,
+            major_keyword=req.major_keyword,
+            major_category=req.major_category,
         )
         return result
     except Exception as e:

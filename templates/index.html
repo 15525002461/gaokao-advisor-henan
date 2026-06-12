@@ -31,10 +31,7 @@
         }
         .form-group { display: flex; flex-direction: column; }
         .form-group.full { grid-column: span 2; }
-        label {
-            font-size: 13px; color: #4a5568; margin-bottom: 6px;
-            font-weight: 600;
-        }
+        label { font-size: 13px; color: #4a5568; margin-bottom: 6px; font-weight: 600; }
         input, select {
             padding: 10px 12px; border: 1px solid #cbd5e0;
             border-radius: 6px; font-size: 14px; outline: none;
@@ -59,52 +56,91 @@
             display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
             margin-bottom: 20px;
         }
-        .summary-card {
-            text-align: center; padding: 12px;
-            border-radius: 8px; color: white;
-        }
+        .summary-card { text-align: center; padding: 12px; border-radius: 8px; color: white; }
         .summary-card.chong { background: linear-gradient(135deg, #f56565 0%, #ed8936 100%); }
         .summary-card.wen { background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%); }
         .summary-card.bao { background: linear-gradient(135deg, #48bb78 0%, #38a169 100%); }
         .summary-card .num { font-size: 32px; font-weight: 700; }
         .summary-card .lbl { font-size: 13px; opacity: 0.9; }
 
-        .reco-card {
+        /* === 院校卡（按院校聚合） === */
+        .school-card {
             border: 1px solid #e2e8f0; border-radius: 12px;
-            padding: 16px; margin-bottom: 12px;
+            margin-bottom: 14px; transition: all 0.2s;
+            overflow: hidden;
+        }
+        .school-card:hover { border-color: #cbd5e0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
+        .school-card.tier-冲 { border-left: 4px solid #f56565; }
+        .school-card.tier-稳 { border-left: 4px solid #4299e1; }
+        .school-card.tier-保 { border-left: 4px solid #48bb78; }
+
+        .school-head {
+            padding: 16px; cursor: pointer; user-select: none;
+            display: flex; justify-content: space-between; align-items: start;
+        }
+        .school-head:hover { background: #f7fafc; }
+        .school-info { flex: 1; }
+        .school-tier {
+            display: inline-block; padding: 2px 10px; border-radius: 12px;
+            font-size: 12px; font-weight: 600; color: white; margin-right: 8px;
+        }
+        .school-tier.tier-冲 { background: #f56565; }
+        .school-tier.tier-稳 { background: #4299e1; }
+        .school-tier.tier-保 { background: #48bb78; }
+        .school-name { font-size: 18px; font-weight: 700; color: #2d3748; }
+        .school-name .badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
+        .school-name .badge-985 { background: #fed7d7; color: #c53030; }
+        .school-name .badge-211 { background: #bee3f8; color: #2c5282; }
+        .school-meta { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; font-size: 12px; color: #718096; }
+        .school-meta span { background: #edf2f7; padding: 2px 8px; border-radius: 4px; }
+
+        .school-score {
+            text-align: right; font-size: 13px; color: #4a5568;
+            min-width: 120px;
+        }
+        .school-score .label { font-size: 11px; color: #a0aec0; }
+        .school-score .value { font-size: 24px; font-weight: 700; color: #2d3748; }
+        .school-score .gap { font-weight: 700; font-size: 16px; }
+        .school-score .gap.positive { color: #48bb78; }
+        .school-score .gap.negative { color: #f56565; }
+        .school-score .rank { font-size: 11px; color: #a0aec0; margin-top: 2px; }
+
+        .school-reason {
+            padding: 0 16px 12px; font-size: 13px; color: #4a5568;
+        }
+        .school-reason .icon { margin-right: 4px; }
+
+        .expand-btn {
+            display: block; width: 100%; padding: 10px;
+            background: #f7fafc; border: none; border-top: 1px solid #e2e8f0;
+            color: #4a5568; font-size: 13px; cursor: pointer;
             transition: all 0.2s;
         }
-        .reco-card:hover { border-color: #cbd5e0; box-shadow: 0 4px 12px rgba(0,0,0,0.05); }
-        .reco-card.tier-冲 { border-left: 4px solid #f56565; }
-        .reco-card.tier-稳 { border-left: 4px solid #4299e1; }
-        .reco-card.tier-保 { border-left: 4px solid #48bb78; }
+        .expand-btn:hover { background: #edf2f7; color: #2d3748; }
+        .expand-btn .arrow { display: inline-block; transition: transform 0.2s; }
+        .expand-btn.expanded .arrow { transform: rotate(180deg); }
 
-        .reco-head { display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px; }
-        .reco-tier {
-            display: inline-block; padding: 2px 10px; border-radius: 12px;
-            font-size: 12px; font-weight: 600; color: white;
+        .majors-list {
+            max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;
+            background: #fafbfc;
         }
-        .reco-tier.tier-冲 { background: #f56565; }
-        .reco-tier.tier-稳 { background: #4299e1; }
-        .reco-tier.tier-保 { background: #48bb78; }
-        .reco-school { font-size: 18px; font-weight: 700; color: #2d3748; }
-        .reco-school .badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; margin-left: 6px; }
-        .reco-school .badge-985 { background: #fed7d7; color: #c53030; }
-        .reco-school .badge-211 { background: #bee3f8; color: #2c5282; }
-        .reco-major { font-size: 14px; color: #4a5568; margin: 4px 0; }
-        .reco-meta { display: flex; flex-wrap: wrap; gap: 12px; font-size: 12px; color: #718096; }
-        .reco-meta span { background: #edf2f7; padding: 2px 8px; border-radius: 4px; }
-        .reco-score {
-            text-align: right; font-size: 13px; color: #4a5568;
+        .majors-list.expanded { max-height: 2000px; transition: max-height 0.5s ease-in; }
+        .majors-table {
+            width: 100%; border-collapse: collapse; font-size: 13px;
         }
-        .reco-score .gap { font-weight: 700; font-size: 18px; }
-        .reco-score .gap.positive { color: #48bb78; }  /* 绿色：我高，安全 */
-        .reco-score .gap.negative { color: #f56565; }  /* 红色：我差，需冲刺 */
-        .reco-reason {
-            margin-top: 8px; padding: 8px 12px;
-            background: #f7fafc; border-radius: 6px;
-            font-size: 13px; color: #4a5568;
+        .majors-table th {
+            background: #edf2f7; padding: 8px 12px; text-align: left;
+            color: #4a5568; font-weight: 600; font-size: 12px;
         }
+        .majors-table td {
+            padding: 8px 12px; border-top: 1px solid #e2e8f0; color: #2d3748;
+        }
+        .majors-table tr:hover td { background: #f7fafc; }
+        .majors-table .score-cell { text-align: right; font-weight: 600; }
+        .majors-table .gap-cell { text-align: right; }
+        .majors-table .gap-cell.positive { color: #48bb78; }
+        .majors-table .gap-cell.negative { color: #f56565; }
+
         .error { color: #c53030; background: #fed7d7; padding: 12px; border-radius: 8px; }
         .province-chip {
             display: inline-block; padding: 4px 10px; margin: 2px;
@@ -113,13 +149,14 @@
             transition: all 0.15s;
         }
         .province-chip:hover { background: #edf2f7; }
-        .province-chip.active {
-            background: #667eea; color: white; border-color: #667eea;
-        }
+        .province-chip.active { background: #667eea; color: white; border-color: #667eea; }
         .help { font-size: 11px; color: #a0aec0; margin-top: 2px; }
+
         @media (max-width: 600px) {
             form { grid-template-columns: 1fr; }
             button, .form-group.full { grid-column: span 1; }
+            .school-head { flex-direction: column; }
+            .school-score { text-align: left; margin-top: 8px; }
         }
     </style>
 </head>
@@ -158,6 +195,18 @@
                 <option value="2022">2022</option>
             </select>
         </div>
+        <div class="form-group">
+            <label>目标专业分类（可选）</label>
+            <select id="majorCategory">
+                <option value="">不限（全部专业）</option>
+            </select>
+            <div class="help">如选"计算机类"，只推荐有计算机相关专业的学校</div>
+        </div>
+        <div class="form-group">
+            <label>目标专业（自由输入，可选）</label>
+            <input type="text" id="majorKeyword" placeholder="如：人工智能、数据科学">
+            <div class="help">模糊匹配，优先级低于分类选择</div>
+        </div>
         <div class="form-group full">
             <label>目标报考省份（不选=全国）</label>
             <div id="provinceChips"></div>
@@ -166,9 +215,9 @@
         <div class="form-group">
             <label>推荐条数</label>
             <select id="topN">
-                <option value="10" selected>10 条（冲3稳4保3）</option>
-                <option value="15">15 条（冲5稳5保5）</option>
-                <option value="20">20 条（冲7稳7保6）</option>
+                <option value="10" selected>10 所（冲3稳4保3）</option>
+                <option value="15">15 所（冲5稳5保5）</option>
+                <option value="20">20 所（冲7稳7保6）</option>
             </select>
         </div>
         <div class="form-group">
@@ -186,11 +235,10 @@
 
 <script>
 const API = window.location.origin;
-
 let ALL_PROVINCES = [];
+let ALL_CATEGORIES = [];
 let TARGET_PROVS = new Set();
 
-// 加载省份
 async function loadProvinces() {
     const r = await fetch(`${API}/api/provinces`).then(r => r.json());
     ALL_PROVINCES = r.provinces;
@@ -202,7 +250,20 @@ async function loadProvinces() {
     renderProvinceChips();
 }
 
-// 渲染省份 chips
+async function loadMajorCategories() {
+    try {
+        const r = await fetch(`${API}/api/major-categories`).then(r => r.json());
+        ALL_CATEGORIES = r.categories;
+        const sel = document.getElementById('majorCategory');
+        sel.innerHTML = '<option value="">不限（全部专业）</option>' +
+            ALL_CATEGORIES.map(c =>
+                `<option value="${c.key}">${c.name}（${c.keyword_count}个相关）</option>`
+            ).join('');
+    } catch (e) {
+        console.error('loadMajorCategories failed', e);
+    }
+}
+
 function renderProvinceChips() {
     const container = document.getElementById('provinceChips');
     container.innerHTML = ALL_PROVINCES.map(p =>
@@ -222,7 +283,6 @@ function renderProvinceChips() {
     });
 }
 
-// 加载统计
 async function loadStats() {
     try {
         const r = await fetch(`${API}/api/stats`).then(r => r.json());
@@ -239,10 +299,90 @@ async function loadStats() {
 }
 
 function escapeHtml(s) {
-    if (!s) return '';
-    return s.replace(/[&<>"']/g, c =>
+    if (s === null || s === undefined) return '';
+    return String(s).replace(/[&<>"']/g, c =>
         ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]
     );
+}
+
+function renderSchoolCard(school, idx) {
+    const badges = [];
+    if (school.is_985 === '是') badges.push('<span class="badge badge-985">985</span>');
+    if (school.is_211 === '是') badges.push('<span class="badge badge-211">211</span>');
+
+    const gapClass = school.score_gap < 0 ? 'negative' : school.score_gap > 0 ? 'positive' : '';
+    const gapSign = school.score_gap > 0 ? '+' : '';
+    const cardId = `school-card-${idx}`;
+
+    let html = `<div class="school-card tier-${school.tier}" id="${cardId}">
+        <div class="school-head" onclick="toggleMajors('${cardId}')">
+            <div class="school-info">
+                <span class="school-tier tier-${school.tier}">${escapeHtml(school.tier_label)}</span>
+                <span class="school-name">${escapeHtml(school.school_name)}${badges.join('')}</span>
+                <div class="school-meta">
+                    <span>📍 ${escapeHtml(school.school_location || '未知')}</span>
+                    <span>🏛 ${escapeHtml(school.school_nature || '未知')}</span>
+                    ${school.batch ? `<span>📋 ${escapeHtml(school.batch)}</span>` : ''}
+                    <span>📚 ${school.majors.length} 个${school.majors[0]?.major_name ? '专业' : '院校组'}</span>
+                    ${school.total_admit ? `<span>👥 招生 ${school.total_admit} 人</span>` : ''}
+                </div>
+            </div>
+            <div class="school-score">
+                <div class="label">院校最低分</div>
+                <div class="value">${school.school_min_score}</div>
+                <div class="gap ${gapClass}">${gapSign}${school.score_gap} 分</div>
+                ${school.school_min_rank ? `<div class="rank">位次 ${school.school_min_rank.toLocaleString()}</div>` : ''}
+            </div>
+        </div>
+        <div class="school-reason">💡 ${escapeHtml(school.reason)}</div>
+        <button class="expand-btn" onclick="toggleMajors('${cardId}')">
+            <span class="arrow">▼</span> 展开查看 ${school.majors.length} 个专业分数
+        </button>
+        <div class="majors-list" id="majors-${cardId}">
+            <table class="majors-table">
+                <thead>
+                    <tr>
+                        <th>专业</th>
+                        <th>专业组</th>
+                        <th>选科要求</th>
+                        <th style="text-align:right">最低分</th>
+                        <th style="text-align:right">差/高</th>
+                        <th style="text-align:right">位次</th>
+                        <th style="text-align:right">招生</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${school.majors.map(m => {
+                        const mc = m.score_gap < 0 ? 'negative' : m.score_gap > 0 ? 'positive' : '';
+                        const ms = m.score_gap > 0 ? '+' : '';
+                        return `<tr>
+                            <td><strong>${escapeHtml(m.major_name || '(院校组)')}</strong>${m.major_remark ? `<br><small style="color:#a0aec0">${escapeHtml(m.major_remark)}</small>` : ''}</td>
+                            <td>${escapeHtml(m.group_code || '-')}</td>
+                            <td style="font-size:12px">${escapeHtml(m.subject_req || '-')}</td>
+                            <td class="score-cell">${m.min_score || '-'}</td>
+                            <td class="gap-cell ${mc}">${m.min_score ? ms + m.score_gap : '-'}</td>
+                            <td class="score-cell">${m.min_rank ? m.min_rank.toLocaleString() : '-'}</td>
+                            <td class="score-cell">${m.admit_count || '-'}</td>
+                        </tr>`;
+                    }).join('')}
+                </tbody>
+            </table>
+        </div>
+    </div>`;
+    return html;
+}
+
+function toggleMajors(cardId) {
+    const majorsList = document.getElementById(`majors-${cardId}`);
+    const card = document.getElementById(cardId);
+    const btn = card.querySelector('.expand-btn');
+    if (majorsList.classList.contains('expanded')) {
+        majorsList.classList.remove('expanded');
+        btn.classList.remove('expanded');
+    } else {
+        majorsList.classList.add('expanded');
+        btn.classList.add('expanded');
+    }
 }
 
 function renderResults(data) {
@@ -262,40 +402,13 @@ function renderResults(data) {
         </div>
     </div>`;
     html += `<div style="color:#718096;font-size:13px;margin-bottom:16px;">
-        共筛选 <strong>${summary.candidate_total.toLocaleString()}</strong> 条候选记录
+        共筛选 <strong>${summary.candidate_total.toLocaleString()}</strong> 所候选院校${data.input.major_category ? `（仅 ${data.input.major_category}）` : data.input.major_keyword ? `（专业含"${data.input.major_keyword}"）` : ''}
     </div>`;
 
-    for (const r of data.recommendations) {
-        const badges = [];
-        if (r.is_985 === '是') badges.push('<span class="badge badge-985">985</span>');
-        if (r.is_211 === '是') badges.push('<span class="badge badge-211">211</span>');
+    data.recommendations.forEach((school, idx) => {
+        html += renderSchoolCard(school, idx);
+    });
 
-        html += `<div class="reco-card tier-${r.tier}">
-            <div class="reco-head">
-                <div>
-                    <span class="reco-tier tier-${r.tier}">${r.tier_label}</span>
-                    <span class="reco-school">${escapeHtml(r.school_name)}${badges.join('')}</span>
-                    <div class="reco-major">📚 ${escapeHtml(r.major_name || '(院校专业组)')}</div>
-                </div>
-                <div class="reco-score">
-                    <div style="font-size:12px;">去年最低分</div>
-                    <div style="font-size:24px;font-weight:700;">${r.last_year_min_score}</div>
-                    <div class="gap ${r.score_gap < 0 ? 'negative' : r.score_gap > 0 ? 'positive' : ''}">
-                        ${r.score_gap > 0 ? '+' : ''}${r.score_gap} 分
-                    </div>
-                    ${r.last_year_min_rank ? `<div style="font-size:11px;">位次 ${r.last_year_min_rank.toLocaleString()}</div>` : ''}
-                </div>
-            </div>
-            <div class="reco-meta">
-                <span>📍 ${escapeHtml(r.school_location || '未知')}</span>
-                <span>🏛 ${escapeHtml(r.school_nature || '未知')}</span>
-                <span>📋 ${escapeHtml(r.batch || '')}</span>
-                ${r.group_code ? `<span>组: ${escapeHtml(r.group_code)}</span>` : ''}
-                ${r.admit_count ? `<span>招生: ${r.admit_count} 人</span>` : ''}
-            </div>
-            <div class="reco-reason">💡 ${escapeHtml(r.reason)}</div>
-        </div>`;
-    }
     document.getElementById('result').innerHTML = html;
 }
 
@@ -306,6 +419,9 @@ document.getElementById('recoForm').onsubmit = async (e) => {
     btn.textContent = '⏳ 推荐中...';
     document.getElementById('result').innerHTML = '<div class="loading">🔍 正在从 100 万条数据中为您筛选...</div>';
 
+    const majorCategory = document.getElementById('majorCategory').value;
+    const majorKeyword = document.getElementById('majorKeyword').value.trim();
+
     const payload = {
         source_province: document.getElementById('sourceProvince').value,
         score: parseInt(document.getElementById('score').value),
@@ -315,6 +431,8 @@ document.getElementById('recoForm').onsubmit = async (e) => {
         top_n: parseInt(document.getElementById('topN').value),
         include_985_211_only: document.getElementById('schoolLevel').value === '985_211',
     };
+    if (majorCategory) payload.major_category = majorCategory;
+    else if (majorKeyword) payload.major_keyword = majorKeyword;
 
     try {
         const r = await fetch(`${API}/api/recommend`, {
@@ -338,6 +456,7 @@ document.getElementById('recoForm').onsubmit = async (e) => {
 };
 
 loadProvinces();
+loadMajorCategories();
 loadStats();
 </script>
 </body>
