@@ -98,8 +98,8 @@
             text-align: right; font-size: 13px; color: #4a5568;
         }
         .reco-score .gap { font-weight: 700; font-size: 18px; }
-        .reco-score .gap.positive { color: #f56565; }
-        .reco-score .gap.negative { color: #48bb78; }
+        .reco-score .gap.positive { color: #48bb78; }  /* 绿色：我高，安全 */
+        .reco-score .gap.negative { color: #f56565; }  /* 红色：我差，需冲刺 */
         .reco-reason {
             margin-top: 8px; padding: 8px 12px;
             background: #f7fafc; border-radius: 6px;
@@ -280,7 +280,7 @@ function renderResults(data) {
                 <div class="reco-score">
                     <div style="font-size:12px;">去年最低分</div>
                     <div style="font-size:24px;font-weight:700;">${r.last_year_min_score}</div>
-                    <div class="gap ${r.score_gap > 0 ? 'positive' : r.score_gap < 0 ? 'negative' : ''}">
+                    <div class="gap ${r.score_gap < 0 ? 'negative' : r.score_gap > 0 ? 'positive' : ''}">
                         ${r.score_gap > 0 ? '+' : ''}${r.score_gap} 分
                     </div>
                     ${r.last_year_min_rank ? `<div style="font-size:11px;">位次 ${r.last_year_min_rank.toLocaleString()}</div>` : ''}

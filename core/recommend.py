@@ -137,8 +137,13 @@ def get_candidate_schools(
 # ============ 分类 & 排序 ============
 
 def _classify(score: int, school_min_score: int) -> tuple[str | None, str | None]:
-    """根据分数差判断冲稳保档"""
-    gap = school_min_score - score  # 正数=我高
+    """根据分数差判断冲稳保档
+    gap_internal: 院校分 - 我分（正数=院校比我高）
+      冲档：0 < gap_internal ≤ 15  （院校分比我高 0-15 分，需冲一冲）
+      稳档：-5 ≤ gap_internal ≤ 5  （±5 分，稳妥）
+      保档：-30 ≤ gap_internal < -5 （院校分比我低 5-30 分，保底）
+    """
+    gap = school_min_score - score
     if -5 <= gap <= 5:
         return "稳", "稳妥"
     if 0 < gap <= 15:
@@ -146,13 +151,13 @@ def _classify(score: int, school_min_score: int) -> tuple[str | None, str | None
     if -30 <= gap < -5:
         return "保", "保底"
     if gap > 15:
-        return "冲", "大胆冲"  # 分数高出很多，可以冲更高目标
+        return "冲", "大胆冲"
     # gap < -30：差太多，跳过
     return None, None
 
 
-def _build_reason(item: dict, tier: str, score_gap: int) -> str:
-    """生成推荐理由"""
+def _build_reason(item: dict, tier: str, score_gap_user: int) -> str:
+    """生成推荐理由（score_gap_user = 我的分 - 院校分，正数=我高）"""
     parts = []
     if item.get("is_985") == "是":
         parts.append("985 院校")
@@ -165,13 +170,20 @@ def _build_reason(item: dict, tier: str, score_gap: int) -> str:
     if location and location not in ("", item.get("school_name")):
         parts.append(f"位于{location}")
 
-    tier_desc = {
-        "冲": f"院校去年最低分高出您 {score_gap} 分，需冲刺",
-        "稳": f"院校去年最低分 {item.get('min_score')} 与您分数接近，录取希望大",
-        "保": f"院校去年最低分低于您 {abs(score_gap)} 分，保底稳妥",
-    }
-    if tier in tier_desc:
-        parts.append(tier_desc[tier])
+    if tier == "冲":
+        if score_gap_user < 0:
+            parts.append(f"您还差 {abs(score_gap_user)} 分，需冲刺")
+        else:
+            parts.append(f"院校去年最低分 {item.get('min_score')}，录取希望大")
+    elif tier == "稳":
+        if score_gap_user == 0:
+            parts.append("院校去年最低分与您分数相同，录取希望大")
+        elif score_gap_user > 0:
+            parts.append(f"您高出院校去年最低分 {score_gap_user} 分，录取希望大")
+        else:
+            parts.append(f"院校去年最低分 {item.get('min_score')} 比您高 {abs(score_gap_user)} 分，稳妥")
+    elif tier == "保":
+        parts.append(f"您高出院校去年最低分 {score_gap_user} 分，保底稳妥")
 
     if item.get("admit_count"):
         parts.append(f"去年招生 {item['admit_count']} 人")
@@ -238,7 +250,8 @@ def recommend(
             continue
         seen_school_majors.add(dedup_key)
 
-        gap = min_score - score
+        # gap_user 语义：我分 - 院校分（正数=我高，负数=我还差）
+        gap_user = score - min_score
         item = RecommendItem(
             tier=tier,
             tier_label=label,
@@ -254,18 +267,18 @@ def recommend(
             last_year_min_score=min_score,
             last_year_min_rank=c.get("min_rank") or 0,
             admit_count=c.get("admit_count"),
-            score_gap=gap,
-            reason=_build_reason(c, tier, gap),
+            score_gap=gap_user,
+            reason=_build_reason(c, tier, gap_user),
         )
         tiered[tier].append(item)
 
     # 排序 + 取 Top N
-    # 冲档：按 gap 升序（gap 越小越值得冲）
-    # 稳档：按 gap 绝对值升序
-    # 保档：按 gap 降序（gap 越负越稳）
-    tiered["冲"].sort(key=lambda x: x.score_gap)
+    # 冲档（最容易上的排前面）：gap_user 降序（-3 比 -10 更接近 0，更"容易冲上"）
+    # 稳档：按 gap_user 绝对值升序（最接近 0 的最稳）
+    # 保档：按 gap_user 降序（高很多的排前面，最稳）
+    tiered["冲"].sort(key=lambda x: x.score_gap, reverse=True)
     tiered["稳"].sort(key=lambda x: abs(x.score_gap))
-    tiered["保"].sort(key=lambda x: -x.score_gap)  # 负 gap 越大越好
+    tiered["保"].sort(key=lambda x: x.score_gap, reverse=True)  # gap_user 越大越稳（我高很多）
 
     # 配比：3 冲 + 4 稳 + 3 保 = 10 条
     plan = {"冲": 3, "稳": 4, "保": 3} if top_n == 10 else None
