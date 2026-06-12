@@ -124,7 +124,14 @@
             max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;
             background: #fafbfc;
         }
-        .majors-list.expanded { max-height: 2000px; transition: max-height 0.5s ease-in; }
+        .majors-list.expanded {
+            max-height: 70vh; overflow-y: auto; transition: max-height 0.4s ease-in;
+        }
+        /* 美化滚动条 */
+        .majors-list.expanded::-webkit-scrollbar { width: 8px; }
+        .majors-list.expanded::-webkit-scrollbar-track { background: #edf2f7; }
+        .majors-list.expanded::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 4px; }
+        .majors-list.expanded::-webkit-scrollbar-thumb:hover { background: #a0aec0; }
         .majors-table {
             width: 100%; border-collapse: collapse; font-size: 13px;
         }
