@@ -1,0 +1,15 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+venv/
+env/
+.env
+.venv
+data/henan/*.db
+data/henan/*.json
+!data/henan/.gitkeep
+.DS_Store
+*.log
+.pytest_cache/
