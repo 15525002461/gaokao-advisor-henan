@@ -93,12 +93,24 @@ def get_candidate_schools(
     """
     获取候选专业记录（按"院校最低分"做主筛选）
 
-    默认：院校去年最低分 ∈ [score - score_window, score + score_window]
+    智能窗口：
+      - 上限：min(我分 + score_window, 750)
+      - 下限：高分考生拉到 200 分差（"我能不能上"的全部学校）
+              低分考生只拉到 score_window 分差
     """
+    upper = min(score + score_window, 750)
+
+    # 智能下限：高分考生需要看到"碾压级"学校
+    if score >= 600:
+        # 高分考生：拉所有"低于我 200 分以内"的学校
+        # 例：745 → 拉到 545 以上的学校
+        lower = max(score - 200, 100)
+    else:
+        # 普通考生：仅拉 ±score_window 范围
+        lower = max(score - score_window, 100)
+
     conn = _get_conn()
     try:
-        # 主筛选：取院校分表（或专业分表）的相关记录
-        # 目标：找出"考生分数能上"的院校+专业
         where = """
             source_province = ?
             AND year = ?
@@ -106,8 +118,7 @@ def get_candidate_schools(
             AND min_score IS NOT NULL
             AND min_score BETWEEN ? AND ?
         """
-        params = [source_province, year, subject_type,
-                  score - score_window, score + score_window]
+        params = [source_province, year, subject_type, lower, upper]
 
         if target_provinces:
             placeholders = ",".join("?" for _ in target_provinces)
@@ -125,7 +136,7 @@ def get_candidate_schools(
             FROM admissions
             WHERE {where}
             ORDER BY min_score DESC
-            LIMIT 2000
+            LIMIT 10000
         """
         cur = conn.execute(sql, params)
         cols = [d[0] for d in cur.description]
@@ -139,21 +150,28 @@ def get_candidate_schools(
 def _classify(score: int, school_min_score: int) -> tuple[str | None, str | None]:
     """根据分数差判断冲稳保档
     gap_internal: 院校分 - 我分（正数=院校比我高）
-      冲档：0 < gap_internal ≤ 15  （院校分比我高 0-15 分，需冲一冲）
+      冲档：gap_internal > 0           （院校分比我高 0+ 分）
+        - 0 < gap ≤ 15  → "冲一冲"
+        - gap > 15      → "大胆冲"
       稳档：-5 ≤ gap_internal ≤ 5  （±5 分，稳妥）
-      保档：-30 ≤ gap_internal < -5 （院校分比我低 5-30 分，保底）
+      保档：gap_internal < -5           （院校分比我低 5+ 分）
+        - -30 ≤ gap < -5  → "保底"
+        - -60 ≤ gap < -30 → "稳妥保底"
+        - gap < -60       → "绝对稳妥"
     """
     gap = school_min_score - score
     if -5 <= gap <= 5:
         return "稳", "稳妥"
     if 0 < gap <= 15:
         return "冲", "冲一冲"
-    if -30 <= gap < -5:
-        return "保", "保底"
     if gap > 15:
         return "冲", "大胆冲"
-    # gap < -30：差太多，跳过
-    return None, None
+    if -30 <= gap < -5:
+        return "保", "保底"
+    if -60 <= gap < -30:
+        return "保", "稳妥保底"
+    # gap < -60
+    return "保", "绝对稳妥"
 
 
 def _build_reason(item: dict, tier: str, score_gap_user: int) -> str:
@@ -183,7 +201,12 @@ def _build_reason(item: dict, tier: str, score_gap_user: int) -> str:
         else:
             parts.append(f"院校去年最低分 {item.get('min_score')} 比您高 {abs(score_gap_user)} 分，稳妥")
     elif tier == "保":
-        parts.append(f"您高出院校去年最低分 {score_gap_user} 分，保底稳妥")
+        if score_gap_user > 60:
+            parts.append(f"您高出院校去年最低分 {score_gap_user} 分，绝对稳妥")
+        elif score_gap_user > 30:
+            parts.append(f"您高出院校去年最低分 {score_gap_user} 分，稳妥保底")
+        else:
+            parts.append(f"您高出院校去年最低分 {score_gap_user} 分，保底稳妥")
 
     if item.get("admit_count"):
         parts.append(f"去年招生 {item['admit_count']} 人")
@@ -275,10 +298,11 @@ def recommend(
     # 排序 + 取 Top N
     # 冲档（最容易上的排前面）：gap_user 降序（-3 比 -10 更接近 0，更"容易冲上"）
     # 稳档：按 gap_user 绝对值升序（最接近 0 的最稳）
-    # 保档：按 gap_user 降序（高很多的排前面，最稳）
+    # 保档：按 gap_user 升序（高最少的排前，性价比最优）
+    #       例：745 分时，690 分的清华北大比 600 分的武科大更值得保底
     tiered["冲"].sort(key=lambda x: x.score_gap, reverse=True)
     tiered["稳"].sort(key=lambda x: abs(x.score_gap))
-    tiered["保"].sort(key=lambda x: x.score_gap, reverse=True)  # gap_user 越大越稳（我高很多）
+    tiered["保"].sort(key=lambda x: x.score_gap)  # 升序：高出最少的排前
 
     # 配比：3 冲 + 4 稳 + 3 保 = 10 条
     plan = {"冲": 3, "稳": 4, "保": 3} if top_n == 10 else None
